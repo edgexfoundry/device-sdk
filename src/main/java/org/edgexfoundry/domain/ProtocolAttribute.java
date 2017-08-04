@@ -35,7 +35,6 @@ public class ProtocolAttribute {
 	public ProtocolAttribute(Object attributes) {
 		try {
 			Gson gson = new Gson();
-			// 1. Java object to JSON, and save into a file
 			String jsonString = gson.toJson(attributes);
 			ProtocolAttribute thisObject = gson.fromJson(jsonString, this.getClass());
 			
@@ -43,7 +42,6 @@ public class ProtocolAttribute {
 			this.setType(thisObject.getType());
 			
 		} catch (Exception e) {
-			//e.printStackTrace();
 			logger.error("Cannot Construct ProtocolAttribute: " + e.getMessage());
 		}
 	}
