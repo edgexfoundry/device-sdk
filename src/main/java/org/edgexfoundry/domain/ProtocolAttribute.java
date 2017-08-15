@@ -13,52 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @microservice:  device-sdk
+ * @microservice: device-sdk
  * @author: Tyler Cox, Dell
  * @version: 1.0.0
  *******************************************************************************/
+
 package org.edgexfoundry.domain;
 
+import com.google.gson.Gson;
 import org.edgexfoundry.support.logging.client.EdgeXLogger;
 import org.edgexfoundry.support.logging.client.EdgeXLoggerFactory;
-import com.google.gson.Gson;
 
 public class ProtocolAttribute {
-	
-	private final static EdgeXLogger logger = EdgeXLoggerFactory.getEdgeXLogger(ProtocolAttribute.class);
-	
-	// Replace these attributes with the protocol
-	// specific metadata needed by the Protocol Driver
-	private String type;
-	private String instance;
-	
-	public ProtocolAttribute(Object attributes) {
-		try {
-			Gson gson = new Gson();
-			String jsonString = gson.toJson(attributes);
-			ProtocolAttribute thisObject = gson.fromJson(jsonString, this.getClass());
-			
+
+  private static final EdgeXLogger logger =
+	  EdgeXLoggerFactory.getEdgeXLogger(ProtocolAttribute.class);
+
+  // Replace these attributes with the Protocol
+  // specific metadata needed by the Protocol Driver
+  
+	private String Instance;
+	private String Type;
+
+  public ProtocolAttribute(Object attributes) {
+    try {
+      Gson gson = new Gson();
+      String jsonString = gson.toJson(attributes);
+      ProtocolAttribute thisObject = gson.fromJson(jsonString, this.getClass());
+      
 			this.setInstance(thisObject.getInstance());
 			this.setType(thisObject.getType());
-			
-		} catch (Exception e) {
-			logger.error("Cannot Construct ProtocolAttribute: " + e.getMessage());
-		}
+
+    } catch (Exception e) {
+      logger.error("Cannot Construct ProtocolAttribute: " + e.getMessage());
+    }
+  }
+
+  
+	public String getInstance()
+	{
+		return Instance;
 	}
-	
-	public String getType() {
-		return type;
+	public String getType()
+	{
+		return Type;
 	}
-	public void setType(String type) {
-		this.type = type;
+
+  
+	public void setInstance(String Instance)
+	{
+		this.Instance = Instance;
 	}
-	
-	public String getInstance() {
-		return instance;
+	public void setType(String Type)
+	{
+		this.Type = Type;
 	}
-	public void setInstance(String instance) {
-		this.instance = instance;
-	}
-	
 
 }
+

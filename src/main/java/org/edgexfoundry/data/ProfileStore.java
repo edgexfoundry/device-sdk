@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @microservice:  device-sdk
+ * @microservice: device-sdk
  * @author: Tyler Cox, Dell
  * @version: 1.0.0
  *******************************************************************************/
+
 package org.edgexfoundry.data;
 
 import java.util.ArrayList;
@@ -24,10 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 import org.edgexfoundry.controller.DeviceProfileClient;
 import org.edgexfoundry.controller.ValueDescriptorClient;
 import org.edgexfoundry.domain.ProtocolObject;
@@ -43,160 +40,177 @@ import org.edgexfoundry.domain.meta.ResourceOperation;
 import org.edgexfoundry.domain.meta.Units;
 import org.edgexfoundry.support.logging.client.EdgeXLogger;
 import org.edgexfoundry.support.logging.client.EdgeXLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class ProfileStore {
-	private final static EdgeXLogger logger = EdgeXLoggerFactory.getEdgeXLogger(ProfileStore.class);
-	
-	@Autowired
-	private ValueDescriptorClient valueDescriptorClient;
-	
-	@Autowired
-	private DeviceProfileClient deviceProfileClient;
-	
-	private List<ValueDescriptor> valueDescriptors = new ArrayList<ValueDescriptor>();
+  private static final EdgeXLogger logger = EdgeXLoggerFactory.getEdgeXLogger(ProfileStore.class);
 
-	// map (key of device name) to cache of each devices resources keyed by resource name
-	// mapped to resource operations arrays keyed by get or put operation
-	private Map<String, Map<String, Map<String, List<ResourceOperation>>>> commands = new HashMap<>();
+  @Autowired
+  private ValueDescriptorClient valueDescriptorClient;
 
-	public Map<String, Map<String, Map<String, List<ResourceOperation>>>> getCommands() {
-		return commands;
-	}
-		
-	// map (key of device name) to cache each devices profile objects by
-	// profile
-	// object key
-	private Map<String, Map<String, ProtocolObject>> objects = new HashMap<>();
-	
-	public Map<String, Map<String, ProtocolObject>> getObjects() {
-		return objects;
-	}
-	
-	public void updateDevice(Device device) {
-		removeDevice(device);
-		addDevice(device);
-	}
-	
-	public void removeDevice(Device device) {
-		objects.remove(device.getName());
-		commands.remove(device.getName());
-	}
-	
-	public void addDevice(Device device) {
+  @Autowired
+  private DeviceProfileClient deviceProfileClient;
 
-		// put the device's profile resources in the commands map
-		Map<String, Map<String, List<ResourceOperation>>> deviceOperations = new HashMap<>();
-		List<ValueDescriptor> descriptors;
-		try {
-			descriptors = valueDescriptorClient.valueDescriptors();
-		} catch (Exception e) {
-			descriptors = new ArrayList<ValueDescriptor>();
-		}
-		
-		List<ResourceOperation> ops = new ArrayList<ResourceOperation>();
-		
-		// If profile is not complete, update it
-		if (device.getProfile().getDeviceResources() == null) {
-			DeviceProfile profile = deviceProfileClient.deviceProfileForName(device.getProfile().getName());
-			device.setProfile(profile);
-			addDevice(device);
-			return;
-		}
-		
-		List<String> usedDescriptors = new ArrayList<String>();
-		for (Command command: device.getProfile().getCommands()) {
-			usedDescriptors.addAll(command.associatedValueDescriptors());
-		}
+  private List<ValueDescriptor> valueDescriptors = new ArrayList<ValueDescriptor>();
 
-		for (ProfileResource resource: device.getProfile().getResources()) {
-			Map<String, List<ResourceOperation>> operations = new HashMap<String, List<ResourceOperation>>();
-			operations.put("get", resource.getGet());
-			operations.put("set", resource.getSet());
-			deviceOperations.put(resource.getName().toLowerCase(), operations);
-			if(resource.getGet() != null)
-				ops.addAll(resource.getGet());
-			if(resource.getSet() != null)
-				ops.addAll(resource.getSet());
-		}
+  // map (key of device name) to cache of each devices resources keyed by resource name
+  // mapped to resource operations arrays keyed by get or put operation
+  private Map<String, Map<String, Map<String, List<ResourceOperation>>>> commands = new HashMap<>();
 
-		// put the device's profile objects in the objects map
-		// put the device's profile objects in the commands map if no resource exists
-		Map<String, ProtocolObject> deviceObjects = new HashMap<>();
-		for (DeviceObject object: device.getProfile().getDeviceResources()) {
-			ProtocolObject protocolObject = new ProtocolObject(object);
-			
-			PropertyValue value = object.getProperties().getValue();
-			
-			deviceObjects.put(object.getName(), protocolObject);
+  public Map<String, Map<String, Map<String, List<ResourceOperation>>>> getCommands() {
+    return commands;
+  }
 
-			// if there is no resource defined for an object, create one based on the RW parameters
-			if (!deviceOperations.containsKey(object.getName().toLowerCase())) {				
-				String readWrite = value.getReadWrite();
+  // map (key of device name) to cache each devices profile objects by
+  // profile
+  // object key
+  private Map<String, Map<String, ProtocolObject>> objects = new HashMap<>();
 
-				Map<String, List<ResourceOperation>> operations = new HashMap<String, List<ResourceOperation>>();
+  public Map<String, Map<String, ProtocolObject>> getObjects() {
+    return objects;
+  }
 
-				if (readWrite.toLowerCase().contains("r")){
-					ResourceOperation resource = new ResourceOperation("get", object.getName());
-					List<ResourceOperation> getOp = new ArrayList<ResourceOperation>();
-					getOp.add(resource);
-					operations.put(resource.getOperation().toLowerCase(),getOp);
-					ops.add(resource);
-				}
+  public void updateDevice(Device device) {
+    removeDevice(device);
+    addDevice(device);
+  }
 
-				if (readWrite.toLowerCase().contains("w")) {
-					ResourceOperation resource = new ResourceOperation("set", object.getName());
-					List<ResourceOperation> setOp = new ArrayList<ResourceOperation>();
-					setOp.add(resource);
-					operations.put(resource.getOperation().toLowerCase(),setOp);
-					ops.add(resource);
-				}
+  public void removeDevice(Device device) {
+    objects.remove(device.getName());
+    commands.remove(device.getName());
+  }
 
-				deviceOperations.put(object.getName().toLowerCase(),operations);
-			}
-		}
+  public void addDevice(Device device) {
 
-		objects.put(device.getName(), deviceObjects);
-		commands.put(device.getName(), deviceOperations);
-		
-		// Create a value descriptor for each parameter using its underlying object
-		for (ResourceOperation op: ops) {
-			ValueDescriptor descriptor = descriptors.stream().filter(d -> d.getName().equals(op.getParameter())).findAny().orElse(null); 
-		
-			if (descriptor == null) {
-				if (!usedDescriptors.contains(op.getParameter())) continue;
-				DeviceObject object = device.getProfile().getDeviceResources().stream().filter(
-						obj -> obj.getName().equals(op.getObject())).findAny().orElse(null);
-				
-				descriptor = createDescriptor(op.getParameter(), object, device);
-			}
-			
-			valueDescriptors.add(descriptor);
-			descriptors.add(descriptor);
-		}
-	}
+    // put the device's profile resources in the commands map
+    Map<String, Map<String, List<ResourceOperation>>> deviceOperations = new HashMap<>();
+    List<ValueDescriptor> descriptors;
+    try {
+      descriptors = valueDescriptorClient.valueDescriptors();
+    } catch (Exception e) {
+      descriptors = new ArrayList<ValueDescriptor>();
+    }
 
-	private ValueDescriptor createDescriptor(String name, DeviceObject object, Device device) {
-		PropertyValue value = object.getProperties().getValue();
-		Units units = object.getProperties().getUnits();
-		ValueDescriptor descriptor = new ValueDescriptor(name,value.getMinimum(),
-				value.getMaximum(),IoTType.valueOf(value.getType().substring(0,1)),units.getDefaultValue(),
-				value.getDefaultValue(), "%s", null, object.getDescription());
-		try {
-			descriptor.setId(valueDescriptorClient.add(descriptor));
-		} catch (Exception e) {
-			logger.error("Adding Value descriptor: " + descriptor.getName() + " failed with error " + e.getMessage());
-		}
-		return descriptor;
-	}
+    List<ResourceOperation> ops = new ArrayList<ResourceOperation>();
 
-	public List<ValueDescriptor> getValueDescriptors() {
-		return valueDescriptors;
-	}
+    // If profile is not complete, update it
+    if (device.getProfile().getDeviceResources() == null) {
+      DeviceProfile profile =
+          deviceProfileClient.deviceProfileForName(device.getProfile().getName());
+      device.setProfile(profile);
+      addDevice(device);
+      return;
+    }
 
-	public boolean descriptorExists(String name) {
-		return !getValueDescriptors().stream().filter(
-				desc -> desc.getName().equals(name))
-				.collect(Collectors.toList()).isEmpty();
-	}
+    List<String> usedDescriptors = new ArrayList<String>();
+    for (Command command: device.getProfile().getCommands()) {
+      usedDescriptors.addAll(command.associatedValueDescriptors());
+    }
+
+    for (ProfileResource resource: device.getProfile().getResources()) {
+      Map<String, List<ResourceOperation>> operations =
+          new HashMap<String, List<ResourceOperation>>();
+      operations.put("get", resource.getGet());
+      operations.put("set", resource.getSet());
+      deviceOperations.put(resource.getName().toLowerCase(), operations);
+
+      if (resource.getGet() != null) {
+        ops.addAll(resource.getGet());
+      }
+
+      if (resource.getSet() != null) {
+        ops.addAll(resource.getSet());
+      }
+    }
+
+    // put the device's profile objects in the objects map
+    // put the device's profile objects in the commands map if no resource exists
+    Map<String, ProtocolObject> deviceObjects = new HashMap<>();
+    for (DeviceObject object: device.getProfile().getDeviceResources()) {
+      ProtocolObject ProtocolObject = new ProtocolObject(object);
+
+      PropertyValue value = object.getProperties().getValue();
+
+      deviceObjects.put(object.getName(), ProtocolObject);
+
+      // if there is no resource defined for an object, create one based on the
+      // RW parameters
+      if (!deviceOperations.containsKey(object.getName().toLowerCase())) {
+        String readWrite = value.getReadWrite();
+
+        Map<String, List<ResourceOperation>> operations =
+            new HashMap<String, List<ResourceOperation>>();
+
+        if (readWrite.toLowerCase().contains("r")) {
+          ResourceOperation resource = new ResourceOperation("get", object.getName());
+          List<ResourceOperation> getOp = new ArrayList<ResourceOperation>();
+          getOp.add(resource);
+          operations.put(resource.getOperation().toLowerCase(),getOp);
+          ops.add(resource);
+        }
+
+        if (readWrite.toLowerCase().contains("w")) {
+          ResourceOperation resource = new ResourceOperation("set", object.getName());
+          List<ResourceOperation> setOp = new ArrayList<ResourceOperation>();
+          setOp.add(resource);
+          operations.put(resource.getOperation().toLowerCase(),setOp);
+          ops.add(resource);
+        }
+
+        deviceOperations.put(object.getName().toLowerCase(),operations);
+      }
+    }
+
+    objects.put(device.getName(), deviceObjects);
+    commands.put(device.getName(), deviceOperations);
+
+    // Create a value descriptor for each parameter using its underlying object
+    for (ResourceOperation op: ops) {
+      ValueDescriptor descriptor = descriptors.stream().filter(d -> d.getName()
+          .equals(op.getParameter())).findAny().orElse(null);
+
+      if (descriptor == null) {
+        if (!usedDescriptors.contains(op.getParameter())) {
+          continue;
+        }
+
+        DeviceObject object = device.getProfile().getDeviceResources().stream().filter(
+            obj -> obj.getName().equals(op.getObject())).findAny().orElse(null);
+
+        descriptor = createDescriptor(op.getParameter(), object, device);
+      }
+
+      valueDescriptors.add(descriptor);
+      descriptors.add(descriptor);
+    }
+  }
+
+  private ValueDescriptor createDescriptor(String name, DeviceObject object, Device device) {
+    PropertyValue value = object.getProperties().getValue();
+    Units units = object.getProperties().getUnits();
+    ValueDescriptor descriptor = new ValueDescriptor(name,value.getMinimum(),
+        value.getMaximum(),IoTType.valueOf(value.getType().substring(0,1)),units.getDefaultValue(),
+        value.getDefaultValue(), "%s", null, object.getDescription());
+
+    try {
+      descriptor.setId(valueDescriptorClient.add(descriptor));
+    } catch (Exception e) {
+      logger.error("Adding Value descriptor: " + descriptor.getName()
+          + " failed with error " + e.getMessage());
+    }
+
+    return descriptor;
+  }
+
+  public List<ValueDescriptor> getValueDescriptors() {
+    return valueDescriptors;
+  }
+
+  public boolean descriptorExists(String name) {
+    return !getValueDescriptors().stream().filter(
+        desc -> desc.getName().equals(name))
+        .collect(Collectors.toList()).isEmpty();
+  }
 }

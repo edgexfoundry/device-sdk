@@ -12,7 +12,7 @@ schemas:
         ","title": "Notification Schema","properties": {"id": {"description": "the identifier of the object which is called back","type": "string"},"actionType": {"description": "the type of the called back object","enum":["PROFILE","DEVICE","PROVISIONWATCHER","SCHEDULE","SCHEDULEEVENT"],"type": "string"},"required": ["id"]}}'
 /ping: 
     displayName: Ping Resource
-    description: Example - http://localhost:49999/api/v1/ping
+    description: Example - http://localhost:49999/api/{version}/ping
     get: 
         description: Test service providing an indication that the service is available.
         displayName: service up check
@@ -23,7 +23,7 @@ schemas:
                 description: for unknown or unanticipated issues
 /device/{id}/{command}: 
     displayName: Command Device (by id) with command name
-    description: Example - http://localhost:49999/api/v1/device/57bd0f2d32d258ad3fcd2d4b/Command
+    description: Example - http://localhost:49999/api/{version}/device/57bd0f2d32d258ad3fcd2d4b/Command
     uriParameters: 
         id: 
             displayName: id
@@ -82,7 +82,7 @@ schemas:
                 description: for unanticipated or unknown issues encountered.
 /device/all/{command}: 
     displayName: Command all operational Devices for the service with command name
-    description: Example - http://localhost:49999/api/v1/device/all/Command
+    description: Example - http://localhost:49999/api/{version}/device/all/Command
     uriParameters: 
         command: 
             displayName: command
@@ -130,7 +130,7 @@ schemas:
                 description: for unanticipated or unknown issues encountered.
 /callback: 
     displayName: Update Callback
-    description: Example - http://localhost:49999/api/v1/callback
+    description: Example - http://localhost:49999/api/{version}/callback
     post:
         description: Add the object referred to by the database id. Returns ServiceException (HTTP 503) for unknown or unanticipated issues. Returns NotFoundException (HTTP 404) if the object cannot be found by the id provided in metadata.
         responses: 
@@ -160,7 +160,7 @@ schemas:
                 description: if the object cannot be found by the id provided. 
 /discovery: 
     displayName: Run device discovery request for all registered Provision Watchers
-    description: Example - http://localhost:49999/api/v1/discovery
+    description: Example - http://localhost:49999/api/{version}/discovery
     post: 
         description: Run the discovery request for a device service. Does nothing unlesss the driver functionality is instrumented. Returns ServiceException (HTTP 503) for unknown or unanticipated issues.
         responses: 
@@ -170,7 +170,7 @@ schemas:
                 description: for unknown or unanticipated issues.
 /debug/transformData/{transformData}: 
     displayName: Set the Device Service data transformation state
-    description: Example - http://localhost:49999/api/v1/debug/transformData/false (sets the device service to not transform data to or from the devices)
+    description: Example - http://localhost:49999/api/{version}/debug/transformData/false (sets the device service to not transform data to or from the devices)
     uriParameters: 
         transformData: 
             displayName: transformData

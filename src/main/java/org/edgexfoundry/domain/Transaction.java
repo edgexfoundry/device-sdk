@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @microservice:  device-sdk
+ * @microservice: device-sdk
  * @author: Tyler Cox, Dell
  * @version: 1.0.0
  *******************************************************************************/
+
 package org.edgexfoundry.domain;
 
 import java.util.ArrayList;
@@ -27,55 +28,58 @@ import java.util.UUID;
 
 import org.edgexfoundry.domain.core.Reading;
 
-public class Transaction {	
-	private String transactionId;
-	private List<Reading> readings;
-	private Map<String, Boolean> opIds;
-	private Boolean finished = true;
-	
-	public Transaction() {
-		setTransactionId(UUID.randomUUID().toString());
-		setReadings(new ArrayList<Reading>());
-		opIds = new HashMap<String, Boolean>();
-	}
-	
-	private void setReadings(List<Reading> readings) {
-		this.readings = readings;
-	}
+public class Transaction {
+  private String transactionId;
+  private List<Reading> readings;
+  private Map<String, Boolean> opIds;
+  private Boolean finished = true;
 
-	private void setTransactionId(String transactionId) {
-		this.transactionId = transactionId;
-	}
+  public Transaction() {
+    setTransactionId(UUID.randomUUID().toString());
+    setReadings(new ArrayList<Reading>());
+    opIds = new HashMap<String, Boolean>();
+  }
 
-	public String newOpId() {
-		String opId = UUID.randomUUID().toString();
-		opIds.put(opId, false);
-		finished = false;
-		return opId;
-	}
-	
-	public void finishOp(String opId, List<Reading> readings) {
-		addReadings(readings);
-		opIds.put(opId, true);
-		if (!opIds.values().contains(false))
-			finished = true;
-	}
-	
-	public Boolean isFinished() {
-		return finished;
-	}
+  private void setReadings(List<Reading> readings) {
+    this.readings = readings;
+  }
 
-	public String getTransactionId() {
-		return transactionId;
-	}
+  private void setTransactionId(String transactionId) {
+    this.transactionId = transactionId;
+  }
 
-	public List<Reading> getReadings() {
-		return readings;
-	}
+  public String newOpId() {
+    String opId = UUID.randomUUID().toString();
+    opIds.put(opId, false);
+    finished = false;
+    return opId;
+  }
 
-	private void addReadings(List<Reading> readings) {
-		if (readings != null)
-			this.readings.addAll(readings);
-	}
+  public void finishOp(String opId, List<Reading> readings) {
+    addReadings(readings);
+    opIds.put(opId, true);
+
+    if (!opIds.values().contains(false)) {
+      finished = true;
+    }
+  }
+
+  public Boolean isFinished() {
+    return finished;
+  }
+
+  public String getTransactionId() {
+    return transactionId;
+  }
+
+  public List<Reading> getReadings() {
+    return readings;
+  }
+
+  private void addReadings(List<Reading> readings) {
+    if (readings != null) {
+      this.readings.addAll(readings);
+    }
+  }
 
 }
