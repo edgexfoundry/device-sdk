@@ -1,4 +1,4 @@
-The following open source projects are referenced by the Device Service SDK:
+The following open source projects are referenced by this Device Service:
 
 Spring Boot (Apache 2.0) - https://projects.spring.io/spring-boot/
 https://github.com/spring-projects/spring-boot/blob/master/LICENSE.txt

@@ -13,38 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @microservice:  device-sdk
+ * @microservice: device-sdk
  * @author: Tyler Cox, Dell
  * @version: 1.0.0
  *******************************************************************************/
+
 package org.edgexfoundry.domain;
 
+import org.edgexfoundry.domain.ProtocolAttribute;
 import org.edgexfoundry.domain.meta.DeviceObject;
 
 public class ProtocolObject extends DeviceObject {
 
-	private ProtocolAttribute attributes;
+  private ProtocolAttribute attributes;
 
-	public ProtocolObject(DeviceObject object) {
-		this.setName(object.getName());
-		this.setTag(object.getTag());
-		this.setDescription(object.getDescription());
-		this.setProperties(object.getProperties());
-		this.setAttributes(new ProtocolAttribute(object.getAttributes()));
-	}
-	
-	@Override
-	public ProtocolAttribute getAttributes() {
-		return attributes;
-	}
-	
-	public void setAttributes(ProtocolAttribute attributes) {
-		this.attributes = attributes;
-	}
+  public ProtocolObject(DeviceObject object) {
+    this.setName(object.getName());
+    this.setTag(object.getTag());
+    this.setDescription(object.getDescription());
+    this.setProperties(object.getProperties());
+    this.setAttributes(new ProtocolAttribute(object.getAttributes()));
+  }
 
-	@Override
-	public String toString() {
-		return "ProtocolObject [ " + super.toString() + ", attributes=" + attributes + "]";
-	}
+  @Override
+  public ProtocolAttribute getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(ProtocolAttribute attributes) {
+    this.attributes = attributes;
+  }
+
+  @Override
+  public String toString() {
+    return "ProtocolObject [ " + super.toString() + ", attributes=" + attributes + "]";
+  }
 
 }

@@ -13,35 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @microservice:  device-sdk
+ * @microservice: device-sdk
  * @author: Tyler Cox, Dell
  * @version: 1.0.0
  *******************************************************************************/
+
 package org.edgexfoundry.domain;
 
 public class ResponseObject {
 
-	private String name;
-	private String value;
-	public ResponseObject(String name, String value){
-		this.name = name;
-		this.value = value;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getValue() {
-		return value;
-	}
-	public void setValue(String value) {
-		this.value = value;
-	}
-	@Override
-	public String toString() {
-		return "{\"" + name + "\":\"" + value + "\"}";
-	}
-	
+  private String name;
+  private String value;
+
+  public ResponseObject(String name, String value) {
+    this.name = name;
+    this.value = value;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
+  public void setValue(String value) {
+    this.value = value;
+  }
+
+  @Override
+  public String toString() {
+    return "{\"" + name + "\":\"" + value + "\"}";
+  }
 }

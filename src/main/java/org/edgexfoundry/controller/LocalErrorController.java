@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @microservice:  device-sdk
+ * @microservice: device-sdk
  * @author: Tyler Cox, Dell
  * @version: 1.0.0
  *******************************************************************************/
@@ -34,28 +34,29 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RestController
 public class LocalErrorController implements ErrorController {
-	private static final String PATH = "/error";
+  private static final String PATH = "/error";
 
-	@Autowired
-	private ErrorAttributes errorAttributes;
+  @Autowired
+  private ErrorAttributes errorAttributes;
 
-	@RequestMapping(value = PATH)
-	String error(HttpServletRequest request, HttpServletResponse response) {
-		// Appropriate HTTP response code (e.g. 404 or 500) is automatically set
-		// by Spring.
-		// Here we just define response body.
-		Map<String, Object> errorInfo = getErrorAttributes(request, true);
-		return errorInfo.get("message") + "\n\n" + errorInfo.get("trace");
-	}
+  @RequestMapping(value = PATH)
+  String error(HttpServletRequest request, HttpServletResponse response) {
+    // Appropriate HTTP response code (e.g. 404 or 500) is automatically set
+    // by Spring.
+    // Here we just define response body.
+    Map<String, Object> errorInfo = getErrorAttributes(request, true);
+    return errorInfo.get("message") + "\n\n" + errorInfo.get("trace");
+  }
 
-	@Override
-	public String getErrorPath() {
-		return PATH;
-	}
+  @Override
+  public String getErrorPath() {
+    return PATH;
+  }
 
-	private Map<String, Object> getErrorAttributes(HttpServletRequest request, boolean includeStackTrace) {
-		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
-		return errorAttributes.getErrorAttributes(requestAttributes, includeStackTrace);
-	}
+  private Map<String, Object> getErrorAttributes(HttpServletRequest request,
+      boolean includeStackTrace) {
+    RequestAttributes requestAttributes = new ServletRequestAttributes(request);
+    return errorAttributes.getErrorAttributes(requestAttributes, includeStackTrace);
+  }
 
 }
