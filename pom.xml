@@ -121,12 +121,11 @@
 			</plugin>
 		</plugins>
 	</build>
-    
-    <repositories>
+	<repositories>
 		<repository>
-	        <id>org.edgexfoundry</id>
-	        <name>EdgeX Foundry Nexus Repository</name>
-	        <url>https://nexus.edgexfoundry.org/content/groups/public/</url>
-	    </repository>
+			<id>org.edgexfoundry</id>
+			<name>EdgeX Foundry Nexus Repository</name>
+			<url>${nexusproxy}/content/groups/public/</url>
+		</repository>
 	</repositories>
 </project>
