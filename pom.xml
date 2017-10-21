@@ -34,6 +34,13 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.3.7.RELEASE</version>
 	</parent>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <name>EdgeX Snapshot Repository</name>
+      <url>${nexusproxy}/${repobasepathpath}/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
 	<dependencies>
 		<dependency>
