@@ -38,7 +38,7 @@
     <snapshotRepository>
       <id>snapshots</id>
       <name>EdgeX Snapshot Repository</name>
-      <url>${nexusproxy}/${repobasepathpath}/snapshots</url>
+      <url>${nexusproxy}/${repobasepath}/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 
